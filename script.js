@@ -221,11 +221,31 @@ function createBoard() {
   placeRobot();
 }
 
-function placeRobot() {
+// function placeRobot() {
+//   const target = document.getElementById(cellId(robot.row, robot.col));
+//   if (target) {
+//     target.appendChild(robotEl);
+//     robotEl.style.transform = "rotate(" + robot.direction * 90 + "deg)";
+//   }
+// }
+
+function placeRobot(animate = true) {
   const target = document.getElementById(cellId(robot.row, robot.col));
-  if (target) {
-    target.appendChild(robotEl);
-    robotEl.style.transform = "rotate(" + robot.direction * 90 + "deg)";
+
+  if (!target) return;
+
+  target.appendChild(robotEl);
+
+  if (!animate) {
+    robotEl.classList.add("no-rotate-transition");
+  }
+
+  robotEl.style.transform = "rotate(" + robot.direction * 90 + "deg)";
+
+  if (!animate) {
+    // Terapkan arah baru tanpa animasi rotasi.
+    void robotEl.offsetWidth;
+    robotEl.classList.remove("no-rotate-transition");
   }
 }
 
@@ -308,14 +328,35 @@ function selectLevel(levelIndex) {
   );
 }
 
+// function resetMission(message) {
+//   if (isRunning) return;
+//   commands.length = 0;
+//   robot = { ...startPosition };
+//   // placeRobot();
+//   placeRobot(false);
+//   renderQueue();
+//   nextLevelButton.disabled = true;
+//   nextLevelButton.setAttribute("aria-disabled", "true");
+//   setStatus(message || "Misi diulang. Robot kembali ke titik awal.", "info");
+// }
+
 function resetMission(message) {
   if (isRunning) return;
+
+  // Hentikan animasi tabrakan yang mungkin masih aktif.
+  robotEl.classList.remove("bump", "no-rotate-transition");
+  void robotEl.offsetWidth;
+
+  // Kosongkan algoritma dan kembalikan robot ke titik awal.
   commands.length = 0;
   robot = { ...startPosition };
   placeRobot();
+
   renderQueue();
+
   nextLevelButton.disabled = true;
   nextLevelButton.setAttribute("aria-disabled", "true");
+
   setStatus(message || "Misi diulang. Robot kembali ke titik awal.", "info");
 }
 
@@ -399,6 +440,8 @@ async function runAlgorithm() {
 
   isRunning = true;
   setControlsDisabled(true);
+  robotEl.classList.remove("bump", "no-rotate-transition");
+  void robotEl.offsetWidth;
   robot = { ...startPosition };
   placeRobot();
   setStatus("Robot sedang membaca algoritmamu...", "info");
